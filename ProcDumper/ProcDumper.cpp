@@ -30,26 +30,35 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 	{
 		if (target.Find(dwPid) == PD_NG)
 		{
-			logger.Log(L"Pid %d not found", dwPid);
+			logger.Log(L"[%s] Pid %d not found", __FUNCTION__, dwPid);
 			return PD_NG;
 		}
 	}
 
+	DWORD pids[1024] = { 0 };
+	DWORD count = 0;
 	if (szProcessName)
 	{
-		if (target.Find(szProcessName) == PD_NG)
+		if ((count = target.Find(szProcessName, pids, sizeof(pids))) == 0)
 		{
-			logger.Log(L"process %s not found", szProcessName);
+			logger.Log(L"[%s] process %s not found", __FUNCTION__, szProcessName);
 			return PD_NG;
+		}
+		else if (count > 0)
+		{
+			logger.Log(L"[%s] %d processes found", __FUNCTION__, count);
+			logger.Log(L"[%s] target pid is [%d]", __FUNCTION__, target.GetPid());
 		}
 	}
 
 	dumper.SetTarget(&target);
 	if (dumper.Dump(szDumpPath) == PD_NG)
 	{
-		logger.Log(L"Dump failed [%s]", szDumpPath);
+		logger.Log(L"[%s] Dump failed [%s]", __FUNCTION__, szDumpPath);
 		return PD_NG;
 	}
+
+	logger.Log(L"[%s] Dump success [%s\\%s]", __FUNCTION__, szDumpPath, dumper.GetDumpName().c_str());
 
 	return PD_OK;
 }
@@ -58,7 +67,7 @@ int GenerateLogPath(wchar_t* szLogPath, USHORT length, const wchar_t* szDumpPath
 {
 	const wchar_t* szFileName = L"dumper.log";
 
-	if (wcslen(szDumpPath) + wcslen(szFileName) > length - 1)
+	if (wcslen(szDumpPath) + wcslen(szFileName) + 1 > length)
 	{
 		return PD_NG;
 	}
