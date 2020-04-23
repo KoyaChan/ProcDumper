@@ -4,12 +4,18 @@
 #define PROCDUMPER_API __declspec(dllimport)
 #endif
 
+#define PD_OK 0
+#define PD_NG -1
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	PROCDUMPER_API int DumpProcess(DWORD dwPid, wchar_t* szProcessName);
+	PROCDUMPER_API int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* szDumpPath);
 
 #ifdef __cplusplus
 }
 #endif
+
+int GenerateLogPath(wchar_t* szLogPath, USHORT length, const wchar_t* szDumpPath);
+

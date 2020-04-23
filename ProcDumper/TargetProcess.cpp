@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "ProcDumper.h"
 #include "TargetProcess.h"
 #include <stdio.h>
 
@@ -13,28 +14,22 @@ TargetProcess::~TargetProcess()
 }
 
 
-int TargetProcess::Find(DWORD dwPid)
+int TargetProcess::Find(const DWORD dwPid)
 {
-	FILE *fp;
-	errno_t err = fopen_s(&fp, "C:\\koyto02.txt", "a");
-	fprintf(fp, "TargetProcess::Find called. pid: %d", dwPid);
-	fclose(fp);
-	// TODO: Add your implementation code here.
-	return 0;
+	return PD_OK;
 }
 
 
 // szProcessName : executable file name of the process
-int TargetProcess::Find(wchar_t* szProcessName)
+int TargetProcess::Find(const wchar_t* szProcessName)
 {
 	// TODO: Add your implementation code here.
-	return 0;
+	return PD_OK;
 }
 
 
-// szDumpFile : Full pathname to the dump file
-int TargetProcess::Dump(wchar_t* szDumpFile)
+int TargetProcess::SetLogger(const Logger* pLogger)
 {
-	// TODO: Add your implementation code here.
-	return 0;
+	m_Logger = pLogger;
+	return PD_OK;
 }

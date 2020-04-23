@@ -1,11 +1,15 @@
 #pragma once
+#include "Logger.h"
+
 class TargetProcess
 {
 public:
 	TargetProcess();
 	~TargetProcess();
-	int Find(DWORD dwPid);
-	int Find(wchar_t* szProcessName);
-	int Dump(wchar_t* szDumpFile);
+	int Find(const DWORD dwPid);
+	int Find(const wchar_t* szProcessName);
+	int SetLogger(const Logger* pLogger);
+private:
+	const Logger* m_Logger;
 };
 

@@ -148,6 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Dumper.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="ProcDumper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetProcess.h" />
@@ -155,6 +157,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Dumper.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="ProcDumper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
