@@ -18,7 +18,7 @@ void Logger::SetLogPath(const wchar_t* szLogPath)
 }
 
 
-void Logger::Log(const wchar_t* format, ...)
+void Logger::Log(const wchar_t* format, ...) const
 {
 	if (m_LogPath == L"")
 	{
