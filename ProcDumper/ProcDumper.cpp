@@ -18,6 +18,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 	Dumper dumper;
 	Logger logger;
 
+	// put the log file to the same path as dump
 	wchar_t szLogPath[MAX_PATH] = { 0 };
 	if (GenerateLogPath(szLogPath, MAX_PATH, szDumpPath) == PD_OK)
 	{
@@ -26,6 +27,11 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 		dumper.SetLogger(&logger);
 	}
 
+	// if dwPid is given, set the process of it to the target.
+	// Otherwise, enum all pids of the given process name into the pids array,
+	// and pick one of them and set the process of it to the target.
+	DWORD pids[1024] = { 0 };
+	DWORD count = 0;
 	if (dwPid)
 	{
 		if (target.Find(dwPid) == PD_NG)
@@ -33,11 +39,10 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 			logger.Log(L"[%s] Pid %d not found", __FUNCTIONW__, dwPid);
 			return PD_NG;
 		}
+		pids[0] = dwPid;
+		count = 1;
 	}
-
-	DWORD pids[1024] = { 0 };
-	DWORD count = 0;
-	if (szProcessName)
+	else if (szProcessName)
 	{
 		if ((count = target.Find(szProcessName, pids, sizeof(pids) / sizeof(pids[0]))) == 0)
 		{
@@ -51,6 +56,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 		}
 	}
 
+	// dump the target process into a dump file located in szDumpPath
 	dumper.SetTarget(&target);
 	if (dumper.Dump(szDumpPath) == PD_NG)
 	{
@@ -58,11 +64,10 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 		return PD_NG;
 	}
 
-	logger.Log(L"[%s] Dump success [%s\\%s]", __FUNCTIONW__, szDumpPath, dumper.GetDumpName().c_str());
-
 	return PD_OK;
 }
 
+// log file : "dumper.log" located in szDumpPath
 int GenerateLogPath(wchar_t* szLogPath, USHORT length, const wchar_t* szDumpPath)
 {
 	const wchar_t* szFileName = L"dumper.log";
