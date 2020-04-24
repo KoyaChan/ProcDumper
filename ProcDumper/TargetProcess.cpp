@@ -203,3 +203,9 @@ wstring TargetProcess::GetProcessName() const
 {
 	return m_processName;
 }
+
+
+HANDLE TargetProcess::GetHandle() const
+{
+	return m_hProcess;
+}
