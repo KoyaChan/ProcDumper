@@ -33,5 +33,7 @@ private:
 	const TargetProcess* m_TargetProcess;
 public:
 	wstring GetDumpName() const;
+private:
+	HANDLE m_hDumpFile;
 };
 

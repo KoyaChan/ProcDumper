@@ -6,11 +6,17 @@ Dumper::Dumper()
 	:m_Logger(NULL)
 	,m_DumpName(L"")
 	,m_TargetProcess(NULL)
+	,m_hDumpFile(INVALID_HANDLE_VALUE)
 {
 }
 
 Dumper::~Dumper()
 {
+	if (m_hDumpFile != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(m_hDumpFile);
+		m_hDumpFile = INVALID_HANDLE_VALUE;
+	}
 }
 
 // generate dump file name into m_dumpname
@@ -35,7 +41,7 @@ int Dumper::GenerateDumpName()
 }
 
 
-// make the dump
+// make the dump into szDumpPath. Use GenerateDumpName to make dump file name.
 int Dumper::Dump(const wchar_t* szDumpPath)
 {
 	if (m_TargetProcess == NULL || m_TargetProcess->GetHandle()== NULL)
@@ -65,25 +71,24 @@ int Dumper::Dump(const wchar_t* szDumpPath)
 	}
 	wstring DumpFullPath = wstring(szDumpPath) + L"\\" + m_DumpName;
 
-	HANDLE hDumpFile = CreateFileW(DumpFullPath.c_str(), GENERIC_WRITE, 0, NULL,
+	m_hDumpFile = CreateFileW(DumpFullPath.c_str(), GENERIC_WRITE, 0, NULL,
 									CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-	if (hDumpFile == INVALID_HANDLE_VALUE)
+	if (m_hDumpFile == INVALID_HANDLE_VALUE)
 	{
 		m_Logger->Log(L"[%s] CreateFile dumpfile failed. ec=%d", __FUNCTIONW__, GetLastError());
 		return PD_NG;
 	}
 
-	if (!fnMiniDumpWriteDump(m_TargetProcess->GetHandle(), m_TargetProcess->GetPid(), hDumpFile,
+	// dump full memory
+	if (!fnMiniDumpWriteDump(m_TargetProcess->GetHandle(), m_TargetProcess->GetPid(), m_hDumpFile,
 								MiniDumpWithFullMemory, NULL, NULL, NULL))
 	{
 		m_Logger->Log(L"[%s] MiniDumpWriteDump failed. ec=%d", __FUNCTIONW__, GetLastError());
-		CloseHandle(hDumpFile);
 		return PD_NG;
 	}
 
 	m_Logger->Log(L"[%s] Dump success. path[%s]", __FUNCTIONW__, DumpFullPath.c_str());
-	CloseHandle(hDumpFile);
 
 	return PD_OK;
 }
