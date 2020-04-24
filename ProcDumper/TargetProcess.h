@@ -25,5 +25,6 @@ private:
 public:
 	DWORD GetPid() const;
 	wstring GetProcessName() const;
+	int EnumAllPids(DWORD** pids, DWORD* count);
 };
 

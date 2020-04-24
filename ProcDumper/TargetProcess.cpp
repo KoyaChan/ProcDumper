@@ -20,6 +20,7 @@ TargetProcess::~TargetProcess()
 }
 
 
+// Open the process of the specified pid, and set it to this object
 int TargetProcess::Find(const DWORD dwPid)
 {
 	wchar_t szProcessName[MAX_PATH] = { 0 };
@@ -50,39 +51,20 @@ int TargetProcess::Find(const DWORD dwPid)
 
 // szProcessName : executable file name of the process
 // pids : array to retun the list of pids of the process
-// max_pids : max count of elements in the pids array
-// return : how many processes found. return 0 if error
-// This function opens one of processes with the speicifed process name
+// max_pids : max count of elements to be able to set in the pids array
+// return : how many processes of the name found. return 0 if error
+// One of processes with the speicifed process name is opened and set to this object
 DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_pids)
 {
-	DWORD max_enum_processes = 256;
 	DWORD *allPids = NULL;
-	DWORD cbNeeded, cProcesses;
 	DWORD count = 0;
+	DWORD cProcesses = 0;
 
-	do {
-		if (allPids)
-		{
-			delete[] allPids;
-			allPids = NULL;
-			max_enum_processes *= 2;
-		}
-		allPids = new DWORD[max_enum_processes];
-
-		if (allPids == NULL)
-		{
-			m_Logger->Log(L"[%s] memory allocation failed for all pids", __FUNCTIONW__);
-			return 0;
-		}
-
-		if (!EnumProcesses(allPids, sizeof(allPids[0]) * max_enum_processes, &cbNeeded))
-		{
-			m_Logger->Log(L"[%s] EnumProcesses failed. ec=%d", __FUNCTIONW__, GetLastError());
-			return 0;
-		}
-
-		cProcesses = cbNeeded / sizeof(allPids[0]);
-	} while (cProcesses == max_enum_processes);		// until all pids are enumerated
+	// enum all processes running on the system
+	if (EnumAllPids(&allPids, &cProcesses) == PD_NG)
+	{
+		return 0;
+	}
 
 	DWORD foundIdx = 0;
 	DWORD i;
@@ -101,7 +83,7 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_p
 				m_Logger->Log(L"[%s] pid[%d] is spilled out", __FUNCTIONW__, allPids[i]);
 			}
 		}
-		Close();
+		Close();           // Close the process
 	}
 	delete[] allPids;
 	allPids = NULL;
@@ -111,6 +93,8 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_p
 		m_Logger->Log(L"[%s] Process[%s] not found", __FUNCTIONW__, szProcessName);
 		return 0;
 	}
+
+	// count can be greater than foundIdx because some pids are spilled out
 
 	for (i = 0; i < foundIdx; i++)
 	{
@@ -128,6 +112,46 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_p
 	m_Logger->Log(L"[%s] failed to open a process [%s]", __FUNCTIONW__, szProcessName);
 
 	return 0;
+}
+
+
+// set an array of all pids into ppPids,
+// set the number of elements in the array into count
+// caller needs to free the array by delete[]
+int TargetProcess::EnumAllPids(DWORD** ppPids, DWORD* count)
+{
+	DWORD max_enum_processes = 256;
+	DWORD cbNeeded, cProcesses;
+	DWORD* allPids = NULL;
+
+	do {
+		if (allPids)
+		{
+			delete[] allPids;
+			allPids = NULL;
+			max_enum_processes *= 2;
+		}
+		allPids = new DWORD[max_enum_processes];
+
+		if (allPids == NULL)
+		{
+			m_Logger->Log(L"[%s] memory allocation failed for all pids", __FUNCTIONW__);
+			return PD_NG;
+		}
+
+		if (!EnumProcesses(allPids, sizeof(allPids[0]) * max_enum_processes, &cbNeeded))
+		{
+			m_Logger->Log(L"[%s] EnumProcesses failed. ec=%d", __FUNCTIONW__, GetLastError());
+			delete[] allPids;
+			return PD_NG;
+		}
+
+		cProcesses = cbNeeded / sizeof(allPids[0]);
+	} while (cProcesses == max_enum_processes);		// until all pids are enumerated
+
+	*ppPids = allPids;
+	*count = cProcesses;
+	return PD_OK;
 }
 
 
