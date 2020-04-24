@@ -26,19 +26,19 @@ int TargetProcess::Find(const DWORD dwPid)
 
 	if (!dwPid)
 	{
-		m_Logger->Log(L"[%s] pid is 0", __FUNCTION__);
+		m_Logger->Log(L"[%s] pid is 0", __FUNCTIONW__);
 		return PD_NG;
 	}
 
 	if (Open(dwPid) == PD_NG)
 	{
-		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d] ec[%d]", __FUNCTION__, dwPid, GetLastError());
+		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d] ec[%d]", __FUNCTIONW__, dwPid, GetLastError());
 		return PD_NG;
 	}
 
 	if (!GetModuleFileNameEx(m_hProcess, NULL, szProcessName, MAX_PATH))
 	{
-		m_Logger->Log(L"[%s] GetModuleFileNameEx failed. pid[%d] ec[%d]", __FUNCTION__, dwPid, GetLastError());
+		m_Logger->Log(L"[%s] GetModuleFileNameEx failed. pid[%d] ec[%d]", __FUNCTIONW__, dwPid, GetLastError());
 		return PD_NG;
 	}
 
@@ -50,22 +50,39 @@ int TargetProcess::Find(const DWORD dwPid)
 
 // szProcessName : executable file name of the process
 // pids : array to retun the list of pids of the process
-// size : size of pids array
-// return : how many processes found
+// max_pids : max count of elements in the pids array
+// return : how many processes found. return 0 if error
 // This function opens one of processes with the speicifed process name
-DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD size)
+DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_pids)
 {
-	DWORD allPids[1024] = { 0 };
+	DWORD max_enum_processes = 256;
+	DWORD *allPids = NULL;
 	DWORD cbNeeded, cProcesses;
 	DWORD count = 0;
 
-	if (!EnumProcesses(allPids, sizeof(allPids), &cbNeeded))
-	{
-		m_Logger->Log(L"[%s] EnumProcesses failed. ec=%d", __FUNCTION__, GetLastError());
-		return 0;
-	}
+	do {
+		if (allPids)
+		{
+			delete[] allPids;
+			allPids = NULL;
+			max_enum_processes *= 2;
+		}
+		allPids = new DWORD[max_enum_processes];
 
-	cProcesses = cbNeeded / sizeof(DWORD);
+		if (allPids == NULL)
+		{
+			m_Logger->Log(L"[%s] memory allocation failed for all pids", __FUNCTIONW__);
+			return 0;
+		}
+
+		if (!EnumProcesses(allPids, sizeof(allPids[0]) * max_enum_processes, &cbNeeded))
+		{
+			m_Logger->Log(L"[%s] EnumProcesses failed. ec=%d", __FUNCTIONW__, GetLastError());
+			return 0;
+		}
+
+		cProcesses = cbNeeded / sizeof(allPids[0]);
+	} while (cProcesses == max_enum_processes);		// until all pids are enumerated
 
 	DWORD foundIdx = 0;
 	DWORD i;
@@ -75,31 +92,40 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD size)
 		if (m_processName == szProcessName)
 		{
 			count++;
-			pids[foundIdx++] = allPids[i];
+			if (foundIdx < max_pids)
+			{
+				pids[foundIdx++] = allPids[i];
+			}
+			else
+			{
+				m_Logger->Log(L"[%s] pid[%d] is spilled out", __FUNCTIONW__, allPids[i]);
+			}
 		}
 		Close();
 	}
+	delete[] allPids;
+	allPids = NULL;
 
 	if (count == 0)
 	{
-		m_Logger->Log(L"[%s] Process[%s] not found", __FUNCTION__, szProcessName);
+		m_Logger->Log(L"[%s] Process[%s] not found", __FUNCTIONW__, szProcessName);
 		return 0;
 	}
 
-	for (i = 0; i < count; i++)
+	for (i = 0; i < foundIdx; i++)
 	{
 		if (Find(pids[i]) == PD_OK)
 		{
-			m_Logger->Log(L"[%s] pid[%d] process[%s] opened.", __FUNCTION__, m_dwPid, m_processName.c_str());
+			m_Logger->Log(L"[%s] pid[%d] process[%s] opened.", __FUNCTIONW__, m_dwPid, m_processName.c_str());
 			return count;
 		}
 		else
 		{
-			m_Logger->Log(L"[%s] pid[%d] process[%s] open failed. ec=%d", __FUNCTION__, pids[i], szProcessName);
+			m_Logger->Log(L"[%s] pid[%d] process[%s] open failed. ec=%d", __FUNCTIONW__, pids[i], szProcessName);
 		}
 	}
 
-	m_Logger->Log(L"[%s] failed to open all processes [%s]", __FUNCTION__, szProcessName);
+	m_Logger->Log(L"[%s] failed to open a process [%s]", __FUNCTIONW__, szProcessName);
 
 	return 0;
 }
@@ -122,7 +148,7 @@ int TargetProcess::Open(DWORD dwPid)
 	DWORD dwAccess = GENERIC_ALL;
 	if ((m_hProcess = OpenProcess(dwAccess, FALSE, dwPid)) == NULL)
 	{
-		m_Logger->Log(L"[%s] OpenProcess failed. ec=%d", __FUNCTION__, GetLastError());
+		m_Logger->Log(L"[%s] OpenProcess failed. ec=%d", __FUNCTIONW__, GetLastError());
 		return PD_NG;
 	}
 
