@@ -46,6 +46,7 @@ void Logger::Log(const wchar_t* format, ...) const
 		systemTime.wHour, systemTime.wMinute, systemTime.wSecond,
 		TempMsg1);
 
+	fwprintf_s(fp, L"%s", TempMsg);
 	fflush(fp);
 	fclose(fp);
 }
