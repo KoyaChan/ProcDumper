@@ -15,6 +15,7 @@ ThisProcess::ThisProcess()
 
 ThisProcess::~ThisProcess()
 {
+	DeInit();
 }
 
 
