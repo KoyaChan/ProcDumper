@@ -33,7 +33,7 @@ int TargetProcess::Find(const DWORD dwPid)
 
 	if (Open(dwPid) == PD_NG)
 	{
-		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d] ec[%d]", __FUNCTIONW__, dwPid, GetLastError());
+		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d]", __FUNCTIONW__, dwPid);
 		return PD_NG;
 	}
 
@@ -105,7 +105,7 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_p
 		}
 		else
 		{
-			m_Logger->Log(L"[%s] pid[%d] process[%s] open failed. ec=%d", __FUNCTIONW__, pids[i], szProcessName);
+			m_Logger->Log(L"[%s] pid[%d] process[%s] open failed.", __FUNCTIONW__, pids[i], szProcessName);
 		}
 	}
 
@@ -168,11 +168,10 @@ int TargetProcess::Open(DWORD dwPid)
 		m_Logger->Log(L"[%s] pid is 0");
 		return PD_NG;
 	}
-	//DWORD dwAccess = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_DUP_HANDLE | THREAD_ALL_ACCESS;
-	DWORD dwAccess = GENERIC_ALL;
+	DWORD dwAccess = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_DUP_HANDLE | THREAD_ALL_ACCESS;
 	if ((m_hProcess = OpenProcess(dwAccess, FALSE, dwPid)) == NULL)
 	{
-		m_Logger->Log(L"[%s] OpenProcess failed. ec=%d", __FUNCTIONW__, GetLastError());
+		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d] ec=%d", __FUNCTIONW__, dwPid, GetLastError());
 		return PD_NG;
 	}
 
