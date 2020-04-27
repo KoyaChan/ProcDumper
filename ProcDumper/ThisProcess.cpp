@@ -119,7 +119,6 @@ int ThisProcess::SetPrivilegeAttributes(const LUID luid, const DWORD dwAttribute
 int ThisProcess::SetPrivilegeAttributes(const LPTSTR lpszPrivilege, const DWORD dwAttributes)
 {
 	LUID   luid;
-	TOKEN_PRIVILEGES tokenPrivileges;
 
 	if (!LookupPrivilegeValue(NULL, lpszPrivilege, &luid))
 	{
