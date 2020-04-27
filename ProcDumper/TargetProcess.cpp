@@ -70,6 +70,11 @@ DWORD TargetProcess::Find(const wchar_t* szProcessName, DWORD* pids, DWORD max_p
 	DWORD i;
 	for (i = 0; i < cProcesses; i++)
 	{
+		if (allPids[i] == 0)
+		{
+			continue;
+		}
+
 		Find(allPids[i]);    // open the process
 		if (m_processName == szProcessName)
 		{
