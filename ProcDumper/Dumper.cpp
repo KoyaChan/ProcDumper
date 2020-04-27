@@ -35,7 +35,7 @@ int Dumper::GenerateDumpName()
 		return PD_NG;
 	}
 
-	m_DumpName += m_TargetProcess->GetProcessName() + L"-" + datetime;
+	m_DumpName += m_TargetProcess->GetProcessName() + L"-" + datetime + L".dmp";
 
 	return PD_OK;
 }
@@ -84,7 +84,7 @@ int Dumper::Dump(const wchar_t* szDumpPath)
 	if (!fnMiniDumpWriteDump(m_TargetProcess->GetHandle(), m_TargetProcess->GetPid(), m_hDumpFile,
 								MiniDumpWithFullMemory, NULL, NULL, NULL))
 	{
-		m_Logger->Log(L"[%s] MiniDumpWriteDump failed. ec=%d", __FUNCTIONW__, GetLastError());
+		m_Logger->Log(L"[%s] MiniDumpWriteDump failed. ec=%d", __FUNCTIONW__, GetLastError() & 0xffff);
 		return PD_NG;
 	}
 

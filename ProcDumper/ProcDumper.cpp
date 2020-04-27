@@ -2,10 +2,12 @@
 //
 
 #include "stdafx.h"
+#include <Windows.h>
 #include "ProcDumper.h"
 #include "TargetProcess.h"
 #include "Dumper.h"
 #include "Logger.h"
+#include "ThisProcess.h"
 
 int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* szDumpPath)
 {
@@ -14,6 +16,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 		return PD_NG;
 	}
 
+	ThisProcess caller;
 	TargetProcess target;
 	Dumper dumper;
 	Logger logger;
@@ -23,9 +26,18 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 	if (GenerateLogPath(szLogPath, MAX_PATH, szDumpPath) == PD_OK)
 	{
 		logger.SetLogPath(szLogPath);
+		caller.SetLogger(&logger);
 		target.SetLogger(&logger);
 		dumper.SetLogger(&logger);
 	}
+
+	if (caller.Init() == PD_NG)
+	{
+		return PD_NG;
+	}
+	caller.EnablePrivilege((const LPTSTR)SE_DEBUG_NAME);
+	caller.EnablePrivilege((const LPTSTR)SE_SECURITY_NAME);
+	caller.EnablePrivilege((const LPTSTR)SE_TAKE_OWNERSHIP_NAME);
 
 	// if dwPid is given, set the process of it to the target.
 	// Otherwise, enum all pids of the given process name into the pids array,
@@ -68,7 +80,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 }
 
 // log file : "dumper.log" located in szDumpPath
-int GenerateLogPath(wchar_t* szLogPath, USHORT length, const wchar_t* szDumpPath)
+int GenerateLogPath(wchar_t* szLogPath, const USHORT length, const wchar_t* szDumpPath)
 {
 	const wchar_t* szFileName = L"dumper.log";
 
@@ -81,4 +93,3 @@ int GenerateLogPath(wchar_t* szLogPath, USHORT length, const wchar_t* szDumpPath
 
 	return PD_OK;
 }
-

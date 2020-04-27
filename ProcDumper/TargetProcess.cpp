@@ -43,7 +43,7 @@ int TargetProcess::Find(const DWORD dwPid)
 		return PD_NG;
 	}
 
-	m_processName = szProcessName;
+	m_processName = wcsrchr(szProcessName, L'\\') + 1;
 
 	return PD_OK;
 }
@@ -173,7 +173,8 @@ int TargetProcess::Open(DWORD dwPid)
 		m_Logger->Log(L"[%s] pid is 0");
 		return PD_NG;
 	}
-	DWORD dwAccess = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_DUP_HANDLE | THREAD_ALL_ACCESS;
+
+	DWORD dwAccess = PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | THREAD_ALL_ACCESS;
 	if ((m_hProcess = OpenProcess(dwAccess, FALSE, dwPid)) == NULL)
 	{
 		m_Logger->Log(L"[%s] OpenProcess failed. pid[%d] ec=%d", __FUNCTIONW__, dwPid, GetLastError());

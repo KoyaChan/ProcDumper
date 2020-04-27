@@ -26,14 +26,12 @@ public:
 	int Dump(const wchar_t* szDumpPath);
 	void SetTarget(const TargetProcess* target);
 	void SetLogger(const Logger* pLogger);
+	wstring GetDumpName() const;
 
 private:
 	const Logger* m_Logger;
 	wstring m_DumpName;
 	const TargetProcess* m_TargetProcess;
-public:
-	wstring GetDumpName() const;
-private:
 	HANDLE m_hDumpFile;
 };
 

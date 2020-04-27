@@ -10,6 +10,14 @@ public:
 	int Find(const DWORD dwPid);
 	DWORD Find(const wchar_t* szProcessName, DWORD* pids, DWORD size);
 	int SetLogger(const Logger* pLogger);
+	DWORD GetPid() const;
+	wstring GetProcessName() const;
+	HANDLE GetHandle() const;
+
+private:
+	int EnumAllPids(DWORD** pids, DWORD* count);
+	int Open(DWORD dwPid);
+	void Close();
 
 private:
 	const Logger* m_Logger;
@@ -18,14 +26,5 @@ private:
 	wstring m_processName;  // set by Find
 	HANDLE m_hProcess;      // set by Open
 	// -----
-
-private:
-	int Open(DWORD dwPid);
-	void Close();
-public:
-	DWORD GetPid() const;
-	wstring GetProcessName() const;
-	int EnumAllPids(DWORD** pids, DWORD* count);
-	HANDLE GetHandle() const;
 };
 

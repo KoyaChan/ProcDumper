@@ -5,11 +5,10 @@
 
 ThisProcess::ThisProcess()
 	:m_bPrivilegeChanged(FALSE)
-	,m_hToken(NULL)
-	,m_OriginalPrivileges(NULL)
-	,m_Logger(NULL)
+	, m_hToken(NULL)
+	, m_OriginalPrivileges(NULL)
+	, m_Logger(NULL)
 {
-	Init();
 }
 
 
@@ -66,11 +65,6 @@ int ThisProcess::Init()
 
 int ThisProcess::DeInit()
 {
-	if (!m_hToken)
-	{
-		return PD_OK;
-	}
-	
 	if (m_OriginalPrivileges && m_bPrivilegeChanged)
 	{
 		DWORD PrivilegeCount = m_OriginalPrivileges->PrivilegeCount;
@@ -113,6 +107,7 @@ int ThisProcess::SetPrivilegeAttributes(const LUID luid, const DWORD dwAttribute
 	}
 
 	m_bPrivilegeChanged = TRUE;
+
 	return PD_OK;
 }
 
