@@ -93,3 +93,39 @@ int GenerateLogPath(wchar_t* szLogPath, const USHORT length, const wchar_t* szDu
 
 	return PD_OK;
 }
+
+// FindPid 
+// In : process name
+// Out : A pid of the process
+// return : count of processes of the process name
+int FindPid(const wchar_t* szProcessName, DWORD* dwPid, const wchar_t* szLogPath)
+{
+	TargetProcess target;
+	Logger logger;
+
+	// put the log file to the same path as dump
+	wchar_t szLogFile[MAX_PATH] = { 0 };
+	if (GenerateLogPath(szLogFile, MAX_PATH, szLogPath) == PD_OK)
+	{
+		logger.SetLogPath(szLogPath);
+		target.SetLogger(&logger);
+	}
+
+	DWORD pids[1024] = { 0 };
+	DWORD count = 0;
+	if ((count = target.Find(szProcessName, pids, sizeof(pids) / sizeof(pids[0]))) == 0)
+	{
+		logger.Log(L"[%s] process %s not found", __FUNCTIONW__, szProcessName);
+		*dwPid = 0;
+		return 0;
+	}
+	else if (count > 0)
+	{
+		logger.Log(L"[%s] %d processes found", __FUNCTIONW__, count);
+		*dwPid = target.GetPid();
+		logger.Log(L"[%s] target pid is [%d]", __FUNCTIONW__, *dwPid);
+	}
+
+	return count;
+}
+

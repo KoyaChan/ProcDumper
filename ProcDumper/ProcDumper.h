@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 	PROCDUMPER_API int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* szDumpPath);
+	PROCDUMPER_API int FindPid(const wchar_t* szProcessName, DWORD* dwPid, const wchar_t* szLogPath);
 
 #ifdef __cplusplus
 }
