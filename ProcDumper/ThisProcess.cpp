@@ -3,12 +3,13 @@
 #include "ThisProcess.h"
 
 
-ThisProcess::ThisProcess()
+ThisProcess::ThisProcess(const Logger* logger)
 	:m_bPrivilegeChanged(FALSE)
 	, m_hToken(NULL)
 	, m_OriginalPrivileges(NULL)
 	, m_Logger(NULL)
 {
+	SetLogger(logger);
 }
 
 
@@ -24,7 +25,7 @@ int ThisProcess::EnablePrivilege(const LPTSTR lpszPrivilege)
 }
 
 
-void ThisProcess::SetLogger(Logger* logger)
+void ThisProcess::SetLogger(const Logger* logger)
 {
 	m_Logger = logger;
 }

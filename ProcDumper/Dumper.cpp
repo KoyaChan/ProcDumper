@@ -2,12 +2,13 @@
 #include "Dumper.h"
 
 
-Dumper::Dumper()
+Dumper::Dumper(const Logger* logger)
 	:m_Logger(NULL)
 	,m_DumpName(L"")
 	,m_TargetProcess(NULL)
 	,m_hDumpFile(INVALID_HANDLE_VALUE)
 {
+	SetLogger(logger);
 }
 
 Dumper::~Dumper()

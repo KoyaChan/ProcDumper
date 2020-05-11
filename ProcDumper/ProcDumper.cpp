@@ -16,21 +16,15 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 		return PD_NG;
 	}
 
-	ThisProcess caller;
-	TargetProcess target;
-	Dumper dumper;
-	Logger logger;
-
 	// put the log file to the same path as dump
 	wchar_t szLogPath[MAX_PATH] = { 0 };
-	if (GenerateLogPath(szLogPath, MAX_PATH, szDumpPath) == PD_OK)
+	if (GenerateLogPath(szLogPath, MAX_PATH, szDumpPath) == PD_NG)
 	{
-		logger.SetLogPath(szLogPath);
-		caller.SetLogger(&logger);
-		target.SetLogger(&logger);
-		dumper.SetLogger(&logger);
+		return PD_NG;
 	}
 
+	Logger logger(szLogPath);
+	ThisProcess caller(&logger);
 	if (caller.Init() == PD_NG)
 	{
 		return PD_NG;
@@ -42,6 +36,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 	// if dwPid is given, set the process of it to the target.
 	// Otherwise, enum all pids of the given process name into the pids array,
 	// and pick one of them and set the process of it to the target.
+	TargetProcess target(&logger);
 	DWORD pids[1024] = { 0 };
 	DWORD count = 0;
 	if (dwPid)
@@ -69,6 +64,7 @@ int DumpProcess(const DWORD dwPid, const wchar_t* szProcessName, const wchar_t* 
 	}
 
 	// dump the target process into a dump file located in szDumpPath
+	Dumper dumper(&logger);
 	dumper.SetTarget(&target);
 	if (dumper.Dump(szDumpPath) == PD_NG)
 	{
@@ -100,17 +96,14 @@ int GenerateLogPath(wchar_t* szLogPath, const USHORT length, const wchar_t* szDu
 // return : count of processes of the process name
 int FindPid(const wchar_t* szProcessName, DWORD* dwPid, const wchar_t* szLogPath)
 {
-	TargetProcess target;
-	Logger logger;
-
-	// put the log file to the same path as dump
 	wchar_t szLogFile[MAX_PATH] = { 0 };
-	if (GenerateLogPath(szLogFile, MAX_PATH, szLogPath) == PD_OK)
+	if (GenerateLogPath(szLogFile, MAX_PATH, szLogPath) == PD_NG)
 	{
-		logger.SetLogPath(szLogPath);
-		target.SetLogger(&logger);
+		return PD_NG;
 	}
+	Logger logger(szLogFile);
 
+	TargetProcess target(&logger);
 	DWORD pids[1024] = { 0 };
 	DWORD count = 0;
 	if ((count = target.Find(szProcessName, pids, sizeof(pids) / sizeof(pids[0]))) == 0)

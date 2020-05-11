@@ -2,8 +2,9 @@
 #include "Logger.h"
 #include <stdio.h>
 
-Logger::Logger()
+Logger::Logger(const wchar_t* szLogPath)
 {
+	SetLogPath(szLogPath);
 }
 
 

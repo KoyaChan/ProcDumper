@@ -5,7 +5,7 @@
 class TargetProcess
 {
 public:
-	TargetProcess();
+	TargetProcess(const Logger* logger);
 	~TargetProcess();
 	int Find(const DWORD dwPid);
 	DWORD Find(const wchar_t* szProcessName, DWORD* pids, DWORD size);

@@ -5,12 +5,13 @@
 #include <Psapi.h>
 
 
-TargetProcess::TargetProcess()
+TargetProcess::TargetProcess(const Logger* logger)
 	:m_Logger(NULL)
 	, m_dwPid(0)
 	, m_processName(L"")
 	, m_hProcess(NULL)
 {
+	SetLogger(logger);
 }
 
 

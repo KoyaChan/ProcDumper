@@ -19,7 +19,7 @@ typedef BOOL(WINAPI *FN_MINIDUMPWRITEDUMP)(
 class Dumper
 {
 public:
-	Dumper();
+	Dumper(const Logger* logger);
 	~Dumper();
 public:
 	int GenerateDumpName();

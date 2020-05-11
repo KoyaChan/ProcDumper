@@ -5,9 +5,9 @@
 class ThisProcess
 {
 public:
-	ThisProcess();
+	ThisProcess(const Logger* logger);
 	~ThisProcess();
-	void SetLogger(Logger* logger);
+	void SetLogger(const Logger* logger);
 	int EnablePrivilege(const LPTSTR lpszPrivilege);
 	int Init();
 private:
@@ -19,6 +19,5 @@ private:
 	HANDLE m_hToken;
 	PTOKEN_PRIVILEGES m_OriginalPrivileges;
 	int m_bPrivilegeChanged;
-	Logger* m_Logger;
+	const Logger* m_Logger;
 };
-
